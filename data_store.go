@@ -32,12 +32,15 @@ func (store DataStore) Save(key string, item interface{}) error {
 // holder. holder must be a pointer to some data structure which is capable of
 // holding the item. In general holder should be the same type as the item that
 // was passed to Save.
-func (store DataStore) Find(key string, holder interface{}) error {
-	encodedItem, err := GetItem(key)
+func (store DataStore) Find(key string, holder interface{}) (bool, error) {
+	encodedItem, found, err := GetItem(key)
 	if err != nil {
-		return err
+		return false, err
 	}
-	return store.Encoding.Decode([]byte(encodedItem), holder)
+	if !found {
+		return false, nil
+	}
+	return true, store.Encoding.Decode([]byte(encodedItem), holder)
 }
 
 // Delete deletes the item with the given key from localStorage.
